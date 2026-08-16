@@ -43,8 +43,8 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Category Pills & Custom Button */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      {/* Category Pills & Custom Button — stacked in the narrow xl rail, inline below it */}
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between xl:flex-col xl:items-stretch">
         <div className="flex flex-wrap gap-1.5 p-1 bg-neutral-900/90 border border-neutral-800 rounded-lg">
           {categories.map((cat) => {
             const Icon = cat.icon;
@@ -70,7 +70,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
         <button
           type="button"
           onClick={onOpenCustomModal}
-          className="px-3 py-1.5 rounded-lg border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-sm"
+          className="w-full lg:w-auto xl:w-full shrink-0 px-3 py-1.5 rounded-lg border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors shadow-sm"
         >
           <Sliders className="w-3.5 h-3.5 text-indigo-400" />
           Custom Ratio / Size
@@ -78,7 +78,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       </div>
 
       {/* Preset Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-2 gap-2.5">
         {filteredPresets.map((preset) => {
           const isSelected = selectedPreset.id === preset.id;
           // Calculate visual aspect ratio box styling (max 32px height or width)
@@ -125,7 +125,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                 </div>
 
                 {/* Preset Name */}
-                <h4 className="text-xs font-semibold text-neutral-200 line-clamp-1 mb-1">
+                <h4 className="text-xs font-semibold text-neutral-200 line-clamp-2 mb-1">
                   {preset.name}
                 </h4>
 

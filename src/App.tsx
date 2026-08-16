@@ -375,22 +375,22 @@ export default function App() {
       />
 
       {/* Main App Workspace */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-        {/* Preset Selector Banner */}
-        <section aria-label="Standard Ratio Presets">
-          <PresetSelector
-            selectedPreset={selectedPreset}
-            onSelectPreset={handleSelectPreset}
-            selectedMultipleIndex={selectedMultipleIndex}
-            onSelectMultipleIndex={handleSelectMultipleIndex}
-            onOpenCustomModal={() => setIsCustomModalOpen(true)}
-          />
-        </section>
-
-        {/* 2-Column Responsive Workspace Grid */}
+      <main className="flex-1 max-w-[1800px] w-full mx-auto p-4 sm:p-6">
+        {/* 3-Column Responsive Workspace Grid: presets rail | canvas | analysis */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          {/* Left Column: Interactive Visual Canvas (7 cols) - Stretches to match right column */}
-          <div className="lg:col-span-7 flex flex-col min-h-[620px] h-full">
+          {/* Left Rail on wide screens (3 cols); full-width banner below xl */}
+          <section aria-label="Standard Ratio Presets" className="lg:col-span-12 xl:col-span-3">
+            <PresetSelector
+              selectedPreset={selectedPreset}
+              onSelectPreset={handleSelectPreset}
+              selectedMultipleIndex={selectedMultipleIndex}
+              onSelectMultipleIndex={handleSelectMultipleIndex}
+              onOpenCustomModal={() => setIsCustomModalOpen(true)}
+            />
+          </section>
+
+          {/* Center Column: Interactive Visual Canvas */}
+          <div className="lg:col-span-7 xl:col-span-5 flex flex-col min-h-[620px] h-full">
             <CropCanvas
               imageSrc={imageSrc}
               imageNaturalWidth={imageNaturalWidth}
@@ -410,8 +410,8 @@ export default function App() {
             />
           </div>
 
-          {/* Right Column: Smart Calculations, Strategy & Export (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
+          {/* Right Column: Smart Calculations, Strategy & Export */}
+          <div className="lg:col-span-5 xl:col-span-4 flex flex-col justify-between space-y-5">
             {/* Smart Math & Strategy Engine */}
             <SmartCalculationsCard
               analysis={smartAnalysis}
