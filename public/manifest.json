@@ -1,0 +1,17 @@
+{
+  "name": "Smart Photo Resizer",
+  "short_name": "Photo Resizer",
+  "description": "Intelligent photo resizing, standard aspect ratio auto-cropping, and multi-format batch exporter.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
