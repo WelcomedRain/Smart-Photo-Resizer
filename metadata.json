@@ -1,0 +1,6 @@
+{
+  "name": "Smart Photo Resizer",
+  "description": "Smart photo resizer and auto-crop studio that intelligently optimizes photos for standard aspect ratios, pixel dimensions, and social platforms.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
