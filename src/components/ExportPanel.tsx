@@ -303,16 +303,20 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           </div>
         </div>
 
-        {/* Output Size: standard multiples, native crop pixels, or a custom size */}
-        <div className="space-y-1.5">
+        {/* Output Size: standard multiples, native crop pixels, or a custom size.
+            Bordered as one group so the width/height fields read as belonging to
+            the Custom Size button rather than floating loose below it. */}
+        <div className="space-y-1.5 border border-neutral-800 rounded-lg p-2.5 bg-neutral-950/40">
           <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-semibold block">
             Output Size
           </label>
-          <div className="grid grid-cols-3 gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800">
+          {/* One row: the size fields below always show the resolved dimensions,
+              so Native doesn't need to spell them out on the button. */}
+          <div className="grid grid-cols-5 gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800">
             {[
-              { mult: 1, label: '1× Standard' },
-              { mult: 2, label: '2× Retina' },
-              { mult: 0.5, label: '0.5× Fast' },
+              { mult: 1, label: '1×' },
+              { mult: 2, label: '2×' },
+              { mult: 0.5, label: '0.5×' },
             ].map((s) => (
               <button
                 key={s.mult}
@@ -321,6 +325,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                   setScaleMultiplier(s.mult);
                   setSizeMode('preset');
                 }}
+                title={`${Math.round(targetWidth * s.mult)} × ${Math.round(targetHeight * s.mult)} px`}
                 className={`py-1 text-xs font-semibold rounded-md transition-all ${
                   sizeMode === 'preset' && scaleMultiplier === s.mult
                     ? 'bg-indigo-600 text-white shadow-sm'
@@ -330,9 +335,6 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                 {s.label}
               </button>
             ))}
-          </div>
-
-          <div className="grid grid-cols-2 gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800">
             <button
               type="button"
               onClick={() => setSizeMode('native')}
@@ -343,7 +345,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                   : 'text-neutral-400 hover:text-neutral-200'
               }`}
             >
-              Native ({nativeWidth}×{nativeHeight})
+              Native
             </button>
             <button
               type="button"
@@ -351,13 +353,14 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                 setSizeMode('custom');
                 if (!customWidth) setCustomWidth(String(nativeWidth));
               }}
+              title="Type any width or height; the standard ratio stays locked"
               className={`py-1 text-xs font-semibold rounded-md transition-all ${
                 sizeMode === 'custom'
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-neutral-400 hover:text-neutral-200'
               }`}
             >
-              Custom Size
+              Custom
             </button>
           </div>
 
