@@ -44,12 +44,36 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   const [format, setFormat] = useState<'image/png' | 'image/jpeg' | 'image/webp'>('image/png');
   const [quality, setQuality] = useState<number>(0.92);
   const [scaleMultiplier, setScaleMultiplier] = useState<number>(1);
+  const [sizeMode, setSizeMode] = useState<'preset' | 'native' | 'custom'>('preset');
+  const [customWidth, setCustomWidth] = useState<string>('');
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
+  // The locked ratio of the selected standard, used to derive the second side
+  const ratio = targetWidth / targetHeight;
+
+  // Actual pixels available in the crop box — exporting larger than this upscales
+  const nativeWidth = Math.max(1, Math.round(cropBox.width));
+  const nativeHeight = Math.max(1, Math.round(cropBox.height));
+
   // Compute final exported pixel dimensions
-  const finalWidth = Math.round(targetWidth * scaleMultiplier);
-  const finalHeight = Math.round(targetHeight * scaleMultiplier);
+  let finalWidth: number;
+  let finalHeight: number;
+  if (sizeMode === 'native') {
+    finalWidth = nativeWidth;
+    finalHeight = nativeHeight;
+  } else if (sizeMode === 'custom') {
+    const parsed = parseInt(customWidth, 10);
+    finalWidth = Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 20000) : targetWidth;
+    finalHeight = Math.max(1, Math.round(finalWidth / ratio));
+  } else {
+    finalWidth = Math.round(targetWidth * scaleMultiplier);
+    finalHeight = Math.round(targetHeight * scaleMultiplier);
+  }
+
+  // How far the export is being scaled past the real pixels in the crop
+  const upscaleFactor = finalWidth / nativeWidth;
+  const isUpscaling = upscaleFactor > 1.01;
 
   /**
    * Render high-resolution canvas with transforms, cropping, and smart letterbox
@@ -279,10 +303,10 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           </div>
         </div>
 
-        {/* Resolution Scale Multiplier */}
+        {/* Output Size: standard multiples, native crop pixels, or a custom size */}
         <div className="space-y-1.5">
           <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-semibold block">
-            Resolution Scale
+            Output Size
           </label>
           <div className="grid grid-cols-3 gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800">
             {[
@@ -293,9 +317,12 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
               <button
                 key={s.mult}
                 type="button"
-                onClick={() => setScaleMultiplier(s.mult)}
+                onClick={() => {
+                  setScaleMultiplier(s.mult);
+                  setSizeMode('preset');
+                }}
                 className={`py-1 text-xs font-semibold rounded-md transition-all ${
-                  scaleMultiplier === s.mult
+                  sizeMode === 'preset' && scaleMultiplier === s.mult
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-neutral-400 hover:text-neutral-200'
                 }`}
@@ -303,6 +330,79 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                 {s.label}
               </button>
             ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800">
+            <button
+              type="button"
+              onClick={() => setSizeMode('native')}
+              title={`Export the crop's real pixels (${nativeWidth} × ${nativeHeight}) with no resampling`}
+              className={`py-1 text-xs font-semibold rounded-md transition-all ${
+                sizeMode === 'native'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              Native ({nativeWidth}×{nativeHeight})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSizeMode('custom');
+                if (!customWidth) setCustomWidth(String(nativeWidth));
+              }}
+              className={`py-1 text-xs font-semibold rounded-md transition-all ${
+                sizeMode === 'custom'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              Custom Size
+            </button>
+          </div>
+
+          {/* Linked width/height fields — ratio stays locked to the standard */}
+          {sizeMode === 'custom' && (
+            <div className="flex items-center gap-2 pt-0.5">
+              <div className="flex-1">
+                <label className="text-[10px] text-neutral-500 block mb-0.5">Width</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={customWidth}
+                  onChange={(e) => setCustomWidth(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-md px-2 py-1 text-xs font-mono text-neutral-100 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+              <span className="text-neutral-600 text-xs pt-4">×</span>
+              <div className="flex-1">
+                <label className="text-[10px] text-neutral-500 block mb-0.5">Height</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={finalHeight}
+                  onChange={(e) => {
+                    const h = parseInt(e.target.value, 10);
+                    if (Number.isFinite(h) && h > 0) {
+                      setCustomWidth(String(Math.max(1, Math.round(h * ratio))));
+                    }
+                  }}
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-md px-2 py-1 text-xs font-mono text-neutral-100 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Honest readout: what the ratio actually rounds to, and any upscaling */}
+          <div className="flex items-center justify-between text-[10px] font-mono pt-0.5">
+            <span className="text-neutral-500">
+              {(finalWidth / finalHeight).toFixed(4)} : 1 ({selectedPreset.ratioStr})
+            </span>
+            <span className={isUpscaling ? 'text-amber-400' : 'text-emerald-400'}>
+              {isUpscaling
+                ? `${upscaleFactor.toFixed(2)}× upscale from native`
+                : `${upscaleFactor.toFixed(2)}× of native — no invented pixels`}
+            </span>
           </div>
         </div>
       </div>

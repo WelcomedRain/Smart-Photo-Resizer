@@ -381,13 +381,6 @@ export default function App() {
         onFileUpload={handleFileLoad}
         onOpenBatchModal={() => setIsBatchModalOpen(true)}
         onOpenGuideModal={() => setIsGuideModalOpen(true)}
-        onResetTransforms={() => {
-          setRotation(0);
-          setFlipH(false);
-          setFlipV(false);
-        }}
-        onClearImage={handleClearImage}
-        hasImage={!!imageSrc}
       />
 
       {/* Main App Workspace */}
@@ -423,6 +416,7 @@ export default function App() {
               onFlipHChange={setFlipH}
               flipV={flipV}
               onFlipVChange={setFlipV}
+              onClearImage={handleClearImage}
             />
           </div>
 

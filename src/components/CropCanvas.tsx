@@ -13,6 +13,8 @@ import {
   Sliders,
   Sparkles,
   Image as ImageIcon,
+  RefreshCw,
+  Trash2,
 } from 'lucide-react';
 import { CropRect, StandardPreset, CropStrategyMode } from '../types';
 import { getAnchorOffsets } from '../utils/cropMath';
@@ -33,6 +35,7 @@ interface CropCanvasProps {
   onFlipHChange: (flip: boolean) => void;
   flipV: boolean;
   onFlipVChange: (flip: boolean) => void;
+  onClearImage: () => void;
 }
 
 export const CropCanvas: React.FC<CropCanvasProps> = ({
@@ -51,6 +54,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
   onFlipHChange,
   flipV,
   onFlipVChange,
+  onClearImage,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 600, height: 500 });
@@ -425,6 +429,32 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
               className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300"
             >
               <Maximize className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          <div className="h-4 w-px bg-neutral-800 mx-1" />
+
+          {/* Reset transforms & clear image */}
+          <button
+            type="button"
+            onClick={() => {
+              onRotationChange(0);
+              onFlipHChange(false);
+              onFlipVChange(false);
+            }}
+            title="Reset Rotation & Flips"
+            className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-neutral-200 transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+          {imageSrc && (
+            <button
+              type="button"
+              onClick={onClearImage}
+              title="Clear Image"
+              className="p-1.5 rounded-lg bg-neutral-900 hover:bg-red-900/60 border border-neutral-800 hover:border-red-700 text-neutral-400 hover:text-red-300 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>

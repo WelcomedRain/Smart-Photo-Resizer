@@ -4,11 +4,9 @@ import {
   Upload,
   Layers,
   Sparkles,
-  RefreshCw,
   Image as ImageIcon,
   ChevronDown,
   HelpCircle,
-  Trash2,
 } from 'lucide-react';
 import { SAMPLE_IMAGES, SampleImageDef } from '../utils/sampleImages';
 
@@ -17,9 +15,6 @@ interface NavbarProps {
   onFileUpload: (file: File) => void;
   onOpenBatchModal: () => void;
   onOpenGuideModal: () => void;
-  onResetTransforms: () => void;
-  onClearImage: () => void;
-  hasImage: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -27,9 +22,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onFileUpload,
   onOpenBatchModal,
   onOpenGuideModal,
-  onResetTransforms,
-  onClearImage,
-  hasImage,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="bg-neutral-900/90 backdrop-blur-md border-b border-neutral-800 sticky top-0 z-40 px-4 sm:px-6 py-3">
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div className="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-3">
         {/* Brand & Title */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30">
@@ -141,27 +133,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Batch All</span>
           </button>
 
-          {/* Reset Transforms */}
-          <button
-            type="button"
-            onClick={onResetTransforms}
-            title="Reset Rotation & Flips"
-            className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-400 hover:text-neutral-200 transition-colors"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Clear the loaded image */}
-          {hasImage && (
-            <button
-              type="button"
-              onClick={onClearImage}
-              title="Clear Image"
-              className="p-1.5 rounded-lg bg-neutral-800 hover:bg-red-900/60 border border-neutral-700 hover:border-red-700 text-neutral-400 hover:text-red-300 transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          )}
         </div>
       </div>
     </header>
