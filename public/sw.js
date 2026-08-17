@@ -1,6 +1,6 @@
 // Minimal offline-capable service worker. Chrome requires a fetch handler that
 // can serve the app shell offline before it will offer the install prompt.
-const CACHE = 'spr-v1';
+const CACHE = 'spr-v2';
 const SHELL = ['/Smart-Photo-Resizer/', '/Smart-Photo-Resizer/index.html'];
 
 self.addEventListener('install', (event) => {
@@ -21,10 +21,20 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
 
-  // Navigations: network first, fall back to the cached shell when offline.
+  // Navigations: network first, falling back to the cached shell when offline.
+  // `cache: 'no-cache'` forces revalidation with the server — a plain fetch()
+  // can be answered from the browser's HTTP cache, and GitHub Pages serves
+  // index.html with max-age=600, so a fresh deploy would be invisible for ten
+  // minutes while the stale shell kept pointing at the previous asset hashes.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('/Smart-Photo-Resizer/index.html'))
+      fetch(request, { cache: 'no-cache' })
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put('/Smart-Photo-Resizer/index.html', copy));
+          return res;
+        })
+        .catch(() => caches.match('/Smart-Photo-Resizer/index.html'))
     );
     return;
   }
