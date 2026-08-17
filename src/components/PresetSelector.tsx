@@ -42,7 +42,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       : STANDARD_PRESETS.filter((p) => p.category === activeCategory);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 xl:h-full xl:flex xl:flex-col">
       {/* Category Pills & Custom Button — stacked in the narrow xl rail, inline below it */}
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between xl:flex-col xl:items-stretch">
         <div className="flex flex-wrap gap-1.5 p-1 bg-neutral-900/90 border border-neutral-800 rounded-lg">
@@ -78,7 +78,9 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
       </div>
 
       {/* Preset Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-2 gap-2.5">
+      {/* In the rail, spread the rows so the last one lands level with
+          the bottom of the canvas and export columns. */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-2 gap-2.5 xl:flex-1 xl:content-between">
         {filteredPresets.map((preset) => {
           const isSelected = selectedPreset.id === preset.id;
           // Calculate visual aspect ratio box styling (max 32px height or width)

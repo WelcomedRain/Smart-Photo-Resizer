@@ -36,16 +36,16 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mirrors <main>'s cap-then-pad order so the bar tracks the workspace
           edges at every viewport width, not just narrow ones. */}
       <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6">
-        {/* No card styling — just a divider that stops where the workspace
-            columns stop, so it reads as a header rather than a floating box. */}
-        <div className="border-b border-neutral-800 py-2.5 flex flex-wrap items-center justify-between gap-3">
+        {/* No card styling and no divider — the panels below are already
+            visually separated, so the header just needs to sit above them. */}
+        <div className="py-2.5 flex flex-wrap items-center justify-between gap-3">
         {/* Brand & Title */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30">
             <Crop className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-neutral-100 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-neutral-100 flex items-center gap-2">
               Smart Photo Resizer
               <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                 Precision Auto-Fit

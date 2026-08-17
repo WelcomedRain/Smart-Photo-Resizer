@@ -303,20 +303,16 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           </div>
         </div>
 
-        {/* Output Size: standard multiples, native crop pixels, or a custom size.
-            Bordered as one group so the width/height fields read as belonging to
-            the Custom Size button rather than floating loose below it. */}
-        <div className="space-y-1.5 border border-neutral-800 rounded-lg p-2.5 bg-neutral-950/40">
+        {/* Output Size: standard multiples, native crop pixels, or a custom size */}
+        <div className="space-y-1.5">
           <label className="text-[11px] uppercase tracking-wider text-neutral-400 font-semibold block">
             Output Size
           </label>
-          {/* One row: the size fields below always show the resolved dimensions,
-              so Native doesn't need to spell them out on the button. */}
-          <div className="grid grid-cols-5 gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800">
+          <div className="grid grid-cols-3 gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800">
             {[
-              { mult: 1, label: '1×' },
-              { mult: 2, label: '2×' },
-              { mult: 0.5, label: '0.5×' },
+              { mult: 1, label: '1× Standard' },
+              { mult: 2, label: '2× Retina' },
+              { mult: 0.5, label: '0.5× Fast' },
             ].map((s) => (
               <button
                 key={s.mult}
@@ -325,7 +321,6 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                   setScaleMultiplier(s.mult);
                   setSizeMode('preset');
                 }}
-                title={`${Math.round(targetWidth * s.mult)} × ${Math.round(targetHeight * s.mult)} px`}
                 className={`py-1 text-xs font-semibold rounded-md transition-all ${
                   sizeMode === 'preset' && scaleMultiplier === s.mult
                     ? 'bg-indigo-600 text-white shadow-sm'
@@ -335,6 +330,9 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                 {s.label}
               </button>
             ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-1 bg-neutral-950 p-1 rounded-lg border border-neutral-800">
             <button
               type="button"
               onClick={() => setSizeMode('native')}
@@ -345,7 +343,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                   : 'text-neutral-400 hover:text-neutral-200'
               }`}
             >
-              Native
+              Native ({nativeWidth}×{nativeHeight})
             </button>
             <button
               type="button"
@@ -353,22 +351,26 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                 setSizeMode('custom');
                 if (!customWidth) setCustomWidth(String(nativeWidth));
               }}
-              title="Type any width or height; the standard ratio stays locked"
               className={`py-1 text-xs font-semibold rounded-md transition-all ${
                 sizeMode === 'custom'
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : 'text-neutral-400 hover:text-neutral-200'
               }`}
             >
-              Custom
+              Custom Size
             </button>
           </div>
 
           {/* Linked width/height fields — ratio stays locked to the standard.
-              Always rendered so switching modes never changes the panel's
-              height, which would otherwise stretch the canvas column beside it.
-              Typing in either field takes over as a custom size. */}
-          <div className="flex items-center gap-2 pt-0.5">
+              Hidden rather than unmounted outside custom mode: the row keeps
+              its space, so the panel is already the height it needs and the
+              canvas column beside it never has to resize. */}
+          <div
+            className={`flex items-center gap-2 pt-0.5 ${
+              sizeMode === 'custom' ? '' : 'invisible pointer-events-none'
+            }`}
+            aria-hidden={sizeMode !== 'custom'}
+          >
             <div className="flex-1">
               <label className="text-[10px] text-neutral-500 block mb-0.5">Width</label>
               <input
@@ -401,16 +403,18 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
             </div>
           </div>
 
-          {/* Honest readout: what the ratio actually rounds to, and any upscaling */}
-          <div className="flex items-center justify-between text-[10px] font-mono pt-0.5">
-            <span className="text-neutral-500">
+          {/* Honest readout: what the ratio actually rounds to, and any upscaling.
+              Kept on two fixed lines so a long scale message can never wrap and
+              change the panel's height. */}
+          <div className="pt-0.5 text-[10px] font-mono leading-4 space-y-0.5">
+            <div className="text-neutral-500 truncate">
               {(finalWidth / finalHeight).toFixed(4)} : 1 ({selectedPreset.ratioStr})
-            </span>
-            <span className={isUpscaling ? 'text-amber-400' : 'text-emerald-400'}>
+            </div>
+            <div className={`truncate ${isUpscaling ? 'text-amber-400' : 'text-emerald-400'}`}>
               {isUpscaling
                 ? `${upscaleFactor.toFixed(2)}× upscale from native`
                 : `${upscaleFactor.toFixed(2)}× of native — no invented pixels`}
-            </span>
+            </div>
           </div>
         </div>
       </div>
