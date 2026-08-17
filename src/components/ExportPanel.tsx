@@ -361,37 +361,42 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
             </button>
           </div>
 
-          {/* Linked width/height fields — ratio stays locked to the standard */}
-          {sizeMode === 'custom' && (
-            <div className="flex items-center gap-2 pt-0.5">
-              <div className="flex-1">
-                <label className="text-[10px] text-neutral-500 block mb-0.5">Width</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={customWidth}
-                  onChange={(e) => setCustomWidth(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-md px-2 py-1 text-xs font-mono text-neutral-100 focus:border-indigo-500 focus:outline-none"
-                />
-              </div>
-              <span className="text-neutral-600 text-xs pt-4">×</span>
-              <div className="flex-1">
-                <label className="text-[10px] text-neutral-500 block mb-0.5">Height</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={finalHeight}
-                  onChange={(e) => {
-                    const h = parseInt(e.target.value, 10);
-                    if (Number.isFinite(h) && h > 0) {
-                      setCustomWidth(String(Math.max(1, Math.round(h * ratio))));
-                    }
-                  }}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-md px-2 py-1 text-xs font-mono text-neutral-100 focus:border-indigo-500 focus:outline-none"
-                />
-              </div>
+          {/* Linked width/height fields — ratio stays locked to the standard.
+              Always rendered so switching modes never changes the panel's
+              height, which would otherwise stretch the canvas column beside it.
+              Typing in either field takes over as a custom size. */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <div className="flex-1">
+              <label className="text-[10px] text-neutral-500 block mb-0.5">Width</label>
+              <input
+                type="number"
+                min={1}
+                value={sizeMode === 'custom' ? customWidth : String(finalWidth)}
+                onChange={(e) => {
+                  setCustomWidth(e.target.value);
+                  setSizeMode('custom');
+                }}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-md px-2 py-1 text-xs font-mono text-neutral-100 focus:border-indigo-500 focus:outline-none"
+              />
             </div>
-          )}
+            <span className="text-neutral-600 text-xs pt-4">×</span>
+            <div className="flex-1">
+              <label className="text-[10px] text-neutral-500 block mb-0.5">Height</label>
+              <input
+                type="number"
+                min={1}
+                value={finalHeight}
+                onChange={(e) => {
+                  const h = parseInt(e.target.value, 10);
+                  if (Number.isFinite(h) && h > 0) {
+                    setCustomWidth(String(Math.max(1, Math.round(h * ratio))));
+                    setSizeMode('custom');
+                  }
+                }}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-md px-2 py-1 text-xs font-mono text-neutral-100 focus:border-indigo-500 focus:outline-none"
+              />
+            </div>
+          </div>
 
           {/* Honest readout: what the ratio actually rounds to, and any upscaling */}
           <div className="flex items-center justify-between text-[10px] font-mono pt-0.5">
