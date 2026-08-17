@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Navbar } from './components/Navbar';
 import { PresetSelector } from './components/PresetSelector';
 import { SmartCalculationsCard } from './components/SmartCalculationsCard';
@@ -70,8 +70,12 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Fallback loader if sync generator wasn't available during initial mount
+  // Fallback loader if sync generator wasn't available during initial mount.
+  // Guarded to mount only, so clearing the image doesn't reload the sample.
+  const initialLoadHandled = useRef(false);
   useEffect(() => {
+    if (initialLoadHandled.current) return;
+    initialLoadHandled.current = true;
     if (!imageSrc) {
       const loadInitialSample = async () => {
         const defaultSample = SAMPLE_IMAGES[0];
@@ -208,6 +212,16 @@ export default function App() {
       img.src = result;
     };
     reader.readAsDataURL(file);
+  };
+
+  // Clear the loaded image back to an empty drop state.
+  // The chosen preset and anchor are deliberately kept — only the photo goes.
+  const handleClearImage = () => {
+    setImageSrc('');
+    setImageName('');
+    setRotation(0);
+    setFlipH(false);
+    setFlipV(false);
   };
 
   // Select a preset sample
@@ -372,6 +386,8 @@ export default function App() {
           setFlipH(false);
           setFlipV(false);
         }}
+        onClearImage={handleClearImage}
+        hasImage={!!imageSrc}
       />
 
       {/* Main App Workspace */}

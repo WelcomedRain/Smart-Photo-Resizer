@@ -12,6 +12,7 @@ import {
   Eye,
   Sliders,
   Sparkles,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { CropRect, StandardPreset, CropStrategyMode } from '../types';
 import { getAnchorOffsets } from '../utils/cropMath';
@@ -516,8 +517,12 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
                 }}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-lg text-neutral-400 text-xs">
-                Preparing image...
+              <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-neutral-900 border border-dashed border-neutral-700 rounded-lg text-neutral-400">
+                <ImageIcon className="w-8 h-8 text-neutral-600" />
+                <p className="text-sm font-medium text-neutral-300">No image loaded</p>
+                <p className="text-xs text-neutral-500">
+                  Drag a photo anywhere on the page, or use Upload Image
+                </p>
               </div>
             )}
 

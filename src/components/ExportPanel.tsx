@@ -335,7 +335,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           <button
             type="button"
             onClick={handleDownload}
-            disabled={isExporting}
+            disabled={isExporting || !imageSrc}
             className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
@@ -346,7 +346,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           <button
             type="button"
             onClick={handleCopyClipboard}
-            disabled={isExporting}
+            disabled={isExporting || !imageSrc}
             className="w-full py-2.5 px-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-[0.98] text-neutral-200 font-semibold text-sm border border-neutral-700 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
           >
             {copied ? (
@@ -367,7 +367,8 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
         <button
           type="button"
           onClick={onOpenBatchModal}
-          className="w-full py-2 px-3 rounded-lg bg-neutral-950 hover:bg-neutral-800/80 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-colors"
+          disabled={!imageSrc}
+          className="w-full py-2 px-3 rounded-lg bg-neutral-950 hover:bg-neutral-800/80 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:hover:bg-neutral-950 disabled:hover:text-neutral-300"
         >
           <Layers className="w-3.5 h-3.5 text-indigo-400" />
           <span>Batch Generate All Social Standards (9:16, 1:1, 16:9, 4:5...)</span>

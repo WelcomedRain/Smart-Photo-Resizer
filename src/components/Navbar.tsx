@@ -8,6 +8,7 @@ import {
   Image as ImageIcon,
   ChevronDown,
   HelpCircle,
+  Trash2,
 } from 'lucide-react';
 import { SAMPLE_IMAGES, SampleImageDef } from '../utils/sampleImages';
 
@@ -17,6 +18,8 @@ interface NavbarProps {
   onOpenBatchModal: () => void;
   onOpenGuideModal: () => void;
   onResetTransforms: () => void;
+  onClearImage: () => void;
+  hasImage: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -25,6 +28,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenBatchModal,
   onOpenGuideModal,
   onResetTransforms,
+  onClearImage,
+  hasImage,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -145,6 +150,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
+
+          {/* Clear the loaded image */}
+          {hasImage && (
+            <button
+              type="button"
+              onClick={onClearImage}
+              title="Clear Image"
+              className="p-1.5 rounded-lg bg-neutral-800 hover:bg-red-900/60 border border-neutral-700 hover:border-red-700 text-neutral-400 hover:text-red-300 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </header>
