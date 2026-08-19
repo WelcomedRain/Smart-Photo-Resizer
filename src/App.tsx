@@ -17,6 +17,11 @@ import {
 } from './types';
 import { Upload, Sparkles, Image as ImageIcon, CheckCircle2, HelpCircle } from 'lucide-react';
 
+// Resolves when the promise settles or the timeout elapses, so a stream that
+// never delivers metadata or a frame cannot leave the capture hanging.
+const raceTimeout = (p: Promise<unknown>, ms: number): Promise<unknown> =>
+  Promise.race([p, new Promise((resolve) => setTimeout(resolve, ms))]);
+
 export default function App() {
   // Image State
   const [imageSrc, setImageSrc] = useState<string>(() => {
@@ -32,6 +37,7 @@ export default function App() {
   const [imageNaturalHeight, setImageNaturalHeight] = useState<number>(2000);
   const [imageName, setImageName] = useState<string>('UserPrompt_1090x2000.png');
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
+  const [captureNotice, setCaptureNotice] = useState<string>('');
 
   // Crop & Preset State
   const [selectedPreset, setSelectedPreset] = useState<StandardPreset>(STANDARD_PRESETS[0]); // 9:16 Default
@@ -88,6 +94,13 @@ export default function App() {
       loadInitialSample();
     }
   }, [imageSrc]);
+
+  // Auto-dismiss the capture notice
+  useEffect(() => {
+    if (!captureNotice) return;
+    const t = setTimeout(() => setCaptureNotice(''), 7000);
+    return () => clearTimeout(t);
+  }, [captureNotice]);
 
   // Compute Smart Crop Analysis
   const smartAnalysis = useMemo(() => {
@@ -219,50 +232,99 @@ export default function App() {
   // own surface picker can choose what to capture — so the captured frame is
   // loaded as the source image and the crop box does the region selection.
   const handleCaptureScreen = async () => {
-    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getDisplayMedia) return;
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getDisplayMedia) {
+      setCaptureNotice('Screen capture is not supported in this browser.');
+      return;
+    }
 
     let stream: MediaStream | null = null;
+    let video: HTMLVideoElement | null = null;
     try {
       // preferCurrentTab / selfBrowserSurface are Chrome-only hints that keep
       // this tab out of the picker, so the app does not photograph itself.
+      // No frameRate cap: a slow stream delays the first frame we need.
       const constraints: any = {
-        video: { frameRate: { ideal: 1 } },
+        video: { width: { ideal: 7680 }, height: { ideal: 4320 } },
         audio: false,
         preferCurrentTab: false,
         selfBrowserSurface: 'exclude',
       };
       stream = await navigator.mediaDevices.getDisplayMedia(constraints);
 
-      const video = document.createElement('video');
+      video = document.createElement('video');
       video.srcObject = stream;
       video.muted = true;
       video.playsInline = true;
-      await video.play();
-      // Two frames, so the first painted frame is definitely available
-      await new Promise((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve(null)))
+      // Off-screen but in the document: a detached <video> is never composited,
+      // so it may never present a frame to draw from.
+      video.style.cssText =
+        'position:fixed;left:-10000px;top:0;width:2px;height:2px;opacity:0;pointer-events:none';
+      document.body.appendChild(video);
+
+      // Metadata first — videoWidth/videoHeight stay 0 until it arrives.
+      const el = video;
+      await raceTimeout(
+        new Promise<void>((resolve) => {
+          if (el.readyState >= 1) resolve();
+          else el.onloadedmetadata = () => resolve();
+        }),
+        4000
+      );
+
+      await video.play().catch(() => undefined);
+
+      // Then wait until the element actually holds frame data. Polling
+      // readyState is more dependable here than requestAnimationFrame (which
+      // can fire before any frame exists, and stops while the page sits behind
+      // the picker) or requestVideoFrameCallback (which depends on the element
+      // being composited).
+      await raceTimeout(
+        new Promise<void>((resolve) => {
+          const check = () => {
+            if (el.readyState >= 2) resolve();
+            else setTimeout(check, 50);
+          };
+          check();
+        }),
+        4000
       );
 
       const w = video.videoWidth;
       const h = video.videoHeight;
-      video.pause();
-      video.srcObject = null;
-      if (!w || !h) return;
+      if (!w || !h) {
+        setCaptureNotice('That capture produced no frame. Try again, or choose a different surface.');
+        return;
+      }
 
       const canvas = document.createElement('canvas');
       canvas.width = w;
       canvas.height = h;
-      canvas.getContext('2d')?.drawImage(video, 0, 0, w, h);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      // Draw while the stream is still attached — releasing it first gives a blank canvas.
+      ctx.drawImage(video, 0, 0, w, h);
 
       const blob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, 'image/png')
       );
-      if (blob) {
-        handleFileLoad(new File([blob], `screenshot_${w}x${h}.png`, { type: 'image/png' }));
+      if (!blob) {
+        setCaptureNotice('Could not encode the captured frame.');
+        return;
       }
-    } catch {
-      // Picker dismissed or permission refused — nothing to report.
+      handleFileLoad(new File([blob], `screenshot_${w}x${h}.png`, { type: 'image/png' }));
+    } catch (err) {
+      // Dismissing the picker is not a failure worth reporting.
+      const name = (err as { name?: string })?.name;
+      if (name !== 'NotAllowedError' && name !== 'AbortError') {
+        console.error('Screen capture failed:', err);
+        setCaptureNotice('Screen capture failed — see the browser console for details.');
+      }
     } finally {
+      if (video) {
+        video.pause();
+        video.srcObject = null;
+        video.remove();
+      }
       stream?.getTracks().forEach((t) => t.stop());
     }
   };
@@ -505,6 +567,13 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      {/* Capture feedback — a silent no-op is worse than a visible message */}
+      {captureNotice && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm px-4 py-2.5 rounded-lg bg-neutral-900 border border-amber-600/50 text-amber-200 text-xs shadow-2xl">
+          {captureNotice}
+        </div>
+      )}
 
       {/* Batch Generator Modal */}
       <BatchGeneratorModal
