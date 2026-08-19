@@ -553,6 +553,12 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
                 <p className="text-xs text-neutral-500">
                   Drag a photo anywhere on the page, or use Upload Image
                 </p>
+                <p className="text-xs text-neutral-500">
+                  Or press <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono text-[10px]">Ctrl</kbd>
+                  {' + '}
+                  <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 font-mono text-[10px]">V</kbd>
+                  {' '}to paste a screenshot from the clipboard
+                </p>
               </div>
             )}
 

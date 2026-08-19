@@ -142,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onCaptureScreen}
-              title="Capture a screen, window or tab, then crop it to the selected ratio"
+              title="Capture a whole screen, window or tab. To select a region on the live screen instead, use Windows Snip (Win+Shift+S) and paste it here with Ctrl+V."
               className="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-medium border border-neutral-700 flex items-center gap-1.5 transition-colors"
             >
               <Monitor className="w-3.5 h-3.5 text-indigo-400" />
