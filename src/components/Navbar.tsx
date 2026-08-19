@@ -7,12 +7,14 @@ import {
   Image as ImageIcon,
   ChevronDown,
   HelpCircle,
+  Monitor,
 } from 'lucide-react';
 import { SAMPLE_IMAGES, SampleImageDef } from '../utils/sampleImages';
 
 interface NavbarProps {
   onSelectSample: (sample: SampleImageDef) => void;
   onFileUpload: (file: File) => void;
+  onCaptureScreen: () => void;
   onOpenBatchModal: () => void;
   onOpenGuideModal: () => void;
 }
@@ -20,10 +22,17 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   onSelectSample,
   onFileUpload,
+  onCaptureScreen,
   onOpenBatchModal,
   onOpenGuideModal,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Screen Capture is desktop-only; iOS Safari and mobile Chrome lack it, so
+  // the button is hidden rather than offered and then failing.
+  const canCaptureScreen =
+    typeof navigator !== 'undefined' &&
+    typeof navigator.mediaDevices?.getDisplayMedia === 'function';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -127,6 +136,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Upload className="w-3.5 h-3.5" />
             <span>Upload Image</span>
           </button>
+
+          {/* Screen Capture — grabs a frame, then the crop box selects the region */}
+          {canCaptureScreen && (
+            <button
+              type="button"
+              onClick={onCaptureScreen}
+              title="Capture a screen, window or tab, then crop it to the selected ratio"
+              className="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-medium border border-neutral-700 flex items-center gap-1.5 transition-colors"
+            >
+              <Monitor className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Screenshot</span>
+            </button>
+          )}
 
           {/* Batch Generator Trigger */}
           <button

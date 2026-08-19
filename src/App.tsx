@@ -214,6 +214,59 @@ export default function App() {
     reader.readAsDataURL(file);
   };
 
+  // Grab a still frame from a screen, window or tab the user picks.
+  // A page cannot draw a selection over the live desktop — only the browser's
+  // own surface picker can choose what to capture — so the captured frame is
+  // loaded as the source image and the crop box does the region selection.
+  const handleCaptureScreen = async () => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getDisplayMedia) return;
+
+    let stream: MediaStream | null = null;
+    try {
+      // preferCurrentTab / selfBrowserSurface are Chrome-only hints that keep
+      // this tab out of the picker, so the app does not photograph itself.
+      const constraints: any = {
+        video: { frameRate: { ideal: 1 } },
+        audio: false,
+        preferCurrentTab: false,
+        selfBrowserSurface: 'exclude',
+      };
+      stream = await navigator.mediaDevices.getDisplayMedia(constraints);
+
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.muted = true;
+      video.playsInline = true;
+      await video.play();
+      // Two frames, so the first painted frame is definitely available
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve(null)))
+      );
+
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      video.pause();
+      video.srcObject = null;
+      if (!w || !h) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d')?.drawImage(video, 0, 0, w, h);
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/png')
+      );
+      if (blob) {
+        handleFileLoad(new File([blob], `screenshot_${w}x${h}.png`, { type: 'image/png' }));
+      }
+    } catch {
+      // Picker dismissed or permission refused — nothing to report.
+    } finally {
+      stream?.getTracks().forEach((t) => t.stop());
+    }
+  };
+
   // Clear the loaded image back to an empty drop state.
   // The chosen preset and anchor are deliberately kept — only the photo goes.
   const handleClearImage = () => {
@@ -379,6 +432,7 @@ export default function App() {
       <Navbar
         onSelectSample={handleSelectSample}
         onFileUpload={handleFileLoad}
+        onCaptureScreen={handleCaptureScreen}
         onOpenBatchModal={() => setIsBatchModalOpen(true)}
         onOpenGuideModal={() => setIsGuideModalOpen(true)}
       />
