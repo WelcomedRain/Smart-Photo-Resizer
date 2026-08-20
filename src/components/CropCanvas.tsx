@@ -133,13 +133,13 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
     boxScreenTop = imageScreenTop + cropBox.y * scaleFactor;
   }
 
-  // Is the crop centred on the source? Within 1px either way counts, since
+  // Is the crop centered on the source? Within 1px either way counts, since
   // crop coordinates are rounded integers and exact equality rarely lands.
-  const cropCentreX = cropBox.x + cropBox.width / 2;
-  const cropCentreY = cropBox.y + cropBox.height / 2;
-  const centredOnSource =
-    Math.abs(cropCentreX - imageNaturalWidth / 2) <= 1 &&
-    Math.abs(cropCentreY - imageNaturalHeight / 2) <= 1;
+  const cropCenterX = cropBox.x + cropBox.width / 2;
+  const cropCenterY = cropBox.y + cropBox.height / 2;
+  const centeredOnSource =
+    Math.abs(cropCenterX - imageNaturalWidth / 2) <= 1 &&
+    Math.abs(cropCenterY - imageNaturalHeight / 2) <= 1;
 
   // Maximize crop to full available dimension bounds within image
   const handleMaximizeCrop = () => {
@@ -325,7 +325,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
                 ? 'Maximized Crop View: Crop field expands to fill the full container. Click to switch to Full Photo view.'
                 : 'Full Photo View: Scales entire photo into frame. Click to switch to Maximized Crop view.'
             }
-            className={`px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+            className={`px-2.5 py-1 rounded-lg border text-xs font-medium transition-all flex items-center gap-1.5 ${
               viewMode === 'fit_crop'
                 ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-300 shadow-sm'
                 : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
@@ -341,7 +341,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
             type="button"
             onClick={() => setShowGrid(!showGrid)}
             title="Toggle Rule of Thirds Grid"
-            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 ${
               showGrid
                 ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
                 : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
@@ -354,15 +354,15 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
           <button
             type="button"
             onClick={() => setShowCrosshair(!showCrosshair)}
-            title="Toggle centre crosshair — marks the exact centre of the crop, and turns green when that matches the centre of the source image"
-            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 ${
+            title="Toggle the crop center crosshair — marks the exact center of the crop, and turns green when it matches the center of the source image"
+            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 ${
               showCrosshair
                 ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
                 : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
             }`}
           >
             <Crosshair className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Centre</span>
+            <span className="hidden sm:inline">Center of Crop</span>
           </button>
 
           {!isLivePreview && (
@@ -370,7 +370,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
               type="button"
               onClick={handleMaximizeCrop}
               title="Expand Crop Box to Image Edges"
-              className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-xs transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
+              className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-xs transition-colors flex items-center gap-1"
             >
               <Maximize className="w-3.5 h-3.5 text-indigo-400" />
               <span className="hidden md:inline">Expand to Image</span>
@@ -659,30 +659,30 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
                 </div>
               )}
 
-              {/* Centre crosshair. The thirds grid marks 33% and 67% and so can
-                  never show the centre; this marks 50% on both axes. */}
+              {/* Center crosshair. The thirds grid marks 33% and 67% and so can
+                  never show the center; this marks 50% on both axes. */}
               {showCrosshair && (
                 <div className="absolute inset-0 pointer-events-none">
                   <div
                     className={`absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 ${
-                      centredOnSource ? 'bg-emerald-400/80' : 'bg-white/70'
+                      centeredOnSource ? 'bg-emerald-400/80' : 'bg-white/70'
                     } shadow-[0_0_0_1px_rgba(0,0,0,0.45)]`}
                   />
                   <div
                     className={`absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 ${
-                      centredOnSource ? 'bg-emerald-400/80' : 'bg-white/70'
+                      centeredOnSource ? 'bg-emerald-400/80' : 'bg-white/70'
                     } shadow-[0_0_0_1px_rgba(0,0,0,0.45)]`}
                   />
                   <div
                     className={`absolute left-1/2 top-1/2 w-2.5 h-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${
-                      centredOnSource
+                      centeredOnSource
                         ? 'border-emerald-400 bg-emerald-400/25'
                         : 'border-white/90 bg-black/30'
                     }`}
                   />
-                  {centredOnSource && (
+                  {centeredOnSource && (
                     <span className="absolute left-1/2 top-1/2 mt-3 -translate-x-1/2 text-[10px] font-mono text-emerald-300 bg-black/70 px-1.5 py-0.5 rounded whitespace-nowrap">
-                      centred on source
+                      centered on source
                     </span>
                   )}
                 </div>
@@ -726,7 +726,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
               />
             </div>
 
-            {/* Centre of the source image. Each piece is positioned directly
+            {/* Center of the source image. Each piece is positioned directly
                 against the canvas container — a wrapper div with absolutely
                 positioned children does not resolve to the point we want. */}
             {showCrosshair && imageSrc && (
@@ -746,7 +746,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
                   }}
                 />
                 <div
-                  title="Centre of the source image"
+                  title="Center of the source image"
                   className="absolute pointer-events-none z-20 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-emerald-400 bg-emerald-400/30 shadow-[0_0_0_1px_rgba(0,0,0,0.6)] transition-[left,top] duration-75"
                   style={{
                     left: `${imageScreenLeft + displayWidth / 2}px`,
