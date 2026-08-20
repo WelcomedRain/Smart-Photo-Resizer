@@ -325,7 +325,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
                 ? 'Maximized Crop View: Crop field expands to fill the full container. Click to switch to Full Photo view.'
                 : 'Full Photo View: Scales entire photo into frame. Click to switch to Maximized Crop view.'
             }
-            className={`px-2.5 py-1 rounded-lg border text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
               viewMode === 'fit_crop'
                 ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-300 shadow-sm'
                 : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
@@ -341,7 +341,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
             type="button"
             onClick={() => setShowGrid(!showGrid)}
             title="Toggle Rule of Thirds Grid"
-            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 ${
+            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 ${
               showGrid
                 ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
                 : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
@@ -355,7 +355,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
             type="button"
             onClick={() => setShowCrosshair(!showCrosshair)}
             title="Toggle centre crosshair — marks the exact centre of the crop, and turns green when that matches the centre of the source image"
-            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 ${
+            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 ${
               showCrosshair
                 ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
                 : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
@@ -370,7 +370,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
               type="button"
               onClick={handleMaximizeCrop}
               title="Expand Crop Box to Image Edges"
-              className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-xs transition-colors flex items-center gap-1"
+              className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 text-xs transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
             >
               <Maximize className="w-3.5 h-3.5 text-indigo-400" />
               <span className="hidden md:inline">Expand to Image</span>
@@ -725,6 +725,36 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
                 className="absolute -right-1.5 top-1/2 -translate-y-1/2 h-6 w-2 bg-white border border-indigo-600 rounded-sm cursor-ew-resize shadow-md hover:scale-125 transition-transform"
               />
             </div>
+
+            {/* Centre of the source image. Each piece is positioned directly
+                against the canvas container — a wrapper div with absolutely
+                positioned children does not resolve to the point we want. */}
+            {showCrosshair && imageSrc && (
+              <>
+                <div
+                  className="absolute pointer-events-none z-20 w-6 h-px -translate-x-1/2 -translate-y-1/2 bg-emerald-400/70 transition-[left,top] duration-75"
+                  style={{
+                    left: `${imageScreenLeft + displayWidth / 2}px`,
+                    top: `${imageScreenTop + displayHeight / 2}px`,
+                  }}
+                />
+                <div
+                  className="absolute pointer-events-none z-20 h-6 w-px -translate-x-1/2 -translate-y-1/2 bg-emerald-400/70 transition-[left,top] duration-75"
+                  style={{
+                    left: `${imageScreenLeft + displayWidth / 2}px`,
+                    top: `${imageScreenTop + displayHeight / 2}px`,
+                  }}
+                />
+                <div
+                  title="Centre of the source image"
+                  className="absolute pointer-events-none z-20 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-emerald-400 bg-emerald-400/30 shadow-[0_0_0_1px_rgba(0,0,0,0.6)] transition-[left,top] duration-75"
+                  style={{
+                    left: `${imageScreenLeft + displayWidth / 2}px`,
+                    top: `${imageScreenTop + displayHeight / 2}px`,
+                  }}
+                />
+              </>
+            )}
           </div>
         )}
       </div>
