@@ -59,7 +59,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 600, height: 500 });
-  const [viewMode, setViewMode] = useState<'fit_crop' | 'fit_image'>('fit_crop');
+  const [viewMode, setViewMode] = useState<'fit_crop' | 'fit_image'>('fit_image');
   const [showGrid, setShowGrid] = useState(true);
   const [showCrosshair, setShowCrosshair] = useState(false);
   const [isLivePreview, setIsLivePreview] = useState(false);
@@ -120,7 +120,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
   let imageScreenTop: number;
 
   if (viewMode === 'fit_crop') {
-    // In Maximized Crop mode: center the crop box in the viewport container
+    // In Max Crop mode: center the crop box in the viewport container
     boxScreenLeft = (containerSize.width - boxDisplayWidth) / 2;
     boxScreenTop = (containerSize.height - boxDisplayHeight) / 2;
     imageScreenLeft = boxScreenLeft - cropBox.x * scaleFactor;
@@ -322,8 +322,8 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
             onClick={() => setViewMode(viewMode === 'fit_crop' ? 'fit_image' : 'fit_crop')}
             title={
               viewMode === 'fit_crop'
-                ? 'Maximized Crop View: Crop field expands to fill the full container. Click to switch to Full Photo view.'
-                : 'Full Photo View: Scales entire photo into frame. Click to switch to Maximized Crop view.'
+                ? 'Max Crop view: the crop field expands to fill the container. Click to switch to Fit Photo view.'
+                : 'Fit Photo view: the whole photo is scaled into the frame. Click to switch to Max Crop view.'
             }
             className={`px-2.5 py-1 rounded-lg border text-xs font-medium transition-all flex items-center gap-1.5 ${
               viewMode === 'fit_crop'
@@ -333,7 +333,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
           >
             <Maximize2 className="w-3.5 h-3.5 text-indigo-400" />
             <span className="hidden sm:inline">
-              {viewMode === 'fit_crop' ? 'Maximized Crop' : 'Fit Photo'}
+              {viewMode === 'fit_crop' ? 'Max Crop' : 'Fit Photo'}
             </span>
           </button>
 
@@ -553,7 +553,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
             </div>
           </div>
         ) : (
-          /* Interactive Edit Canvas with Maximized Crop Box & Full Stage Utilization */
+          /* Interactive Edit Canvas with Max Crop Box & Full Stage Utilization */
           <div className="absolute inset-0 overflow-hidden select-none flex items-center justify-center">
             {/* Base Image Positioned according to screen offsets */}
             {imageSrc ? (
