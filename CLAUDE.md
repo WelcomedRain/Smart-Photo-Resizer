@@ -60,6 +60,12 @@ The rail is gated to `xl` deliberately — at `lg` the preset cards measured
 
 ## Verifying UI changes
 
+The preview pane does not advance CSS transitions, so an element mid-transition
+reports its pre-transition position indefinitely. This canvas animates the image
+with `transition-[left,top,width,height]`, which once made a correctly positioned
+overlay look 9px misaligned. Before believing a geometry mismatch, set
+`style.transition = 'none'` and re-measure.
+
 Screenshots are often unavailable in this environment. Measure the DOM instead
 (`getBoundingClientRect`, `scrollHeight` vs `clientHeight`) and say plainly
 that the result was measured, not seen. Gene tests visual results himself —
