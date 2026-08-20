@@ -9,6 +9,7 @@ import {
   Maximize,
   Maximize2,
   Grid,
+  Crosshair,
   Eye,
   Sliders,
   Sparkles,
@@ -60,6 +61,7 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
   const [containerSize, setContainerSize] = useState({ width: 600, height: 500 });
   const [viewMode, setViewMode] = useState<'fit_crop' | 'fit_image'>('fit_crop');
   const [showGrid, setShowGrid] = useState(true);
+  const [showCrosshair, setShowCrosshair] = useState(false);
   const [isLivePreview, setIsLivePreview] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
 
@@ -130,6 +132,14 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
     boxScreenLeft = imageScreenLeft + cropBox.x * scaleFactor;
     boxScreenTop = imageScreenTop + cropBox.y * scaleFactor;
   }
+
+  // Is the crop centred on the source? Within 1px either way counts, since
+  // crop coordinates are rounded integers and exact equality rarely lands.
+  const cropCentreX = cropBox.x + cropBox.width / 2;
+  const cropCentreY = cropBox.y + cropBox.height / 2;
+  const centredOnSource =
+    Math.abs(cropCentreX - imageNaturalWidth / 2) <= 1 &&
+    Math.abs(cropCentreY - imageNaturalHeight / 2) <= 1;
 
   // Maximize crop to full available dimension bounds within image
   const handleMaximizeCrop = () => {
@@ -339,6 +349,20 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
           >
             <Grid className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">3×3 Grid</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowCrosshair(!showCrosshair)}
+            title="Toggle centre crosshair — marks the exact centre of the crop, and turns green when that matches the centre of the source image"
+            className={`p-1.5 rounded-lg border text-xs transition-colors flex items-center gap-1 ${
+              showCrosshair
+                ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
+                : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200'
+            }`}
+          >
+            <Crosshair className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Centre</span>
           </button>
 
           {!isLivePreview && (
@@ -632,6 +656,35 @@ export const CropCanvas: React.FC<CropCanvasProps> = ({
                   {/* Horizontal lines */}
                   <div className="absolute left-0 right-0 top-1/3 h-px bg-white/30 border-b border-black/30" />
                   <div className="absolute left-0 right-0 top-2/3 h-px bg-white/30 border-b border-black/30" />
+                </div>
+              )}
+
+              {/* Centre crosshair. The thirds grid marks 33% and 67% and so can
+                  never show the centre; this marks 50% on both axes. */}
+              {showCrosshair && (
+                <div className="absolute inset-0 pointer-events-none">
+                  <div
+                    className={`absolute top-0 bottom-0 left-1/2 w-px -translate-x-1/2 ${
+                      centredOnSource ? 'bg-emerald-400/80' : 'bg-white/70'
+                    } shadow-[0_0_0_1px_rgba(0,0,0,0.45)]`}
+                  />
+                  <div
+                    className={`absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 ${
+                      centredOnSource ? 'bg-emerald-400/80' : 'bg-white/70'
+                    } shadow-[0_0_0_1px_rgba(0,0,0,0.45)]`}
+                  />
+                  <div
+                    className={`absolute left-1/2 top-1/2 w-2.5 h-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${
+                      centredOnSource
+                        ? 'border-emerald-400 bg-emerald-400/25'
+                        : 'border-white/90 bg-black/30'
+                    }`}
+                  />
+                  {centredOnSource && (
+                    <span className="absolute left-1/2 top-1/2 mt-3 -translate-x-1/2 text-[10px] font-mono text-emerald-300 bg-black/70 px-1.5 py-0.5 rounded whitespace-nowrap">
+                      centred on source
+                    </span>
+                  )}
                 </div>
               )}
 
